@@ -3,6 +3,7 @@ import tensorflow as tf
 import cv2
 import numpy as np
 from flask_cors import CORS, cross_origin
+from sklearn.preprocessing import LabelEncoder
 
 from keras.models import load_model
 # from flask import request
@@ -27,6 +28,41 @@ def hello(id):
 
     item = [item for item in arr if item['id'] == id]
     return jsonify(item)
+
+
+model_batik = load_model('modelbatik.keras')
+
+
+@app.route('/test', methods=['POST'])
+@cross_origin()
+def test():
+    return jsonify({
+        'message': "hello",
+        "status": 1
+    })
+
+
+@app.route('/detectbatik', methods=['POST'])
+@cross_origin()
+def detectbatik():
+
+    print("baca file upload", request.files)
+    # return jsonify({})
+    filestr = request.files['sample'].read()
+    print("convert ke bytes")
+    filebyte = np.fromstring(filestr, np.uint8)
+    # sample.filenam
+    # print(type(sample))
+    # img = cv2.imread(sample)
+
+    print("imdecode")
+    img = cv2.imdecode(filebyte, cv2.IMREAD_UNCHANGED)
+    # img = cv2.imread("caracal.jpeg")
+
+    print("start predict", type(img))
+    # return ({})
+    result = predictbatik(img)
+    return (result)
 
 
 @app.route('/detect', methods=['POST'])
@@ -64,7 +100,8 @@ def preprocess(img, image_size=300):
 
     image = cv2.resize(img, (image_size, image_size))
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = image.astype("float") / 255.0
+    # image = image.astype("float") / 255.0
+    image = image.astype("float")
 
     # Expand dimensions as predict expect image in batches
     image = np.expand_dims(image, axis=0)
@@ -132,3 +169,46 @@ def predict(image, returnimage=False,  scale=0.9):
     # Show the Image with matplotlib
     # plt.figure(figsize=(10, 10))
     # plt.imshow(image[:, :, ::-1])
+
+
+def predictbatik(image):
+    # return jsonify({
+    #     'message': 'success'
+    # })
+    # Before we can make a prediction we need to preprocess the image.
+    IMG_SIZE = 150
+    try:
+        print("preprocessing image!")
+        processed_image = preprocess(image, image_size=IMG_SIZE)
+        # Now we can use our model for prediction
+
+        print("done preprocessing image!")
+        # print(processed_image)
+
+        Z = ['Batik Bali', 'Batik Betawi', 'Batik Cendrawasih',
+             'Batik Lasem', 'Batik Pekalongan']
+        X = [processed_image]
+
+        # getting predictions on val set.
+        # pred=model.predict(x_test)
+        print("start predict", type(X))
+        pred = model_batik.predict(X)
+        print("finish predict", type(pred))
+
+        pred_digits = np.argmax(pred, axis=1)
+        indexclass = pred_digits[0]
+
+        print('pred', pred)
+        print('pred_digits', pred_digits)
+
+        return jsonify({
+            'status': 1,
+            'message': 'Success!',
+            'label': Z[indexclass]
+        })
+    except Exception as err:
+        return jsonify({
+            'status': 0,
+            'message': 'Something went wrong!',
+            'err': repr(err)
+        })
