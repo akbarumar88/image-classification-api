@@ -5,8 +5,13 @@ import numpy as np
 from flask_cors import CORS, cross_origin
 from sklearn.preprocessing import LabelEncoder
 
+import keras
 from keras.models import load_model
 # from flask import request
+
+print("TensorFlow version", tf.__version__)
+print("keras version", keras.__version__)
+
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -19,7 +24,8 @@ arr = [
     {'id': 4, 'name': 'Demetrious J.'},
 ]
 
-model = load_model('caltech-2.h5')
+# model = load_model('caltech-2.h5')
+model_batik = load_model('mymodel-improved.keras')
 
 
 @app.route('/get/<int:id>', methods=['GET', 'POST', 'PUT'])
@@ -28,9 +34,6 @@ def hello(id):
 
     item = [item for item in arr if item['id'] == id]
     return jsonify(item)
-
-
-model_batik = load_model('modelbatik.keras')
 
 
 @app.route('/test', methods=['POST'])
@@ -185,8 +188,8 @@ def predictbatik(image):
         print("done preprocessing image!")
         # print(processed_image)
 
-        Z = ['Batik Bali', 'Batik Betawi', 'Batik Cendrawasih',
-             'Batik Lasem', 'Batik Pekalongan']
+        Z = ['batik-bali', 'batik-betawi', 'batik-celup', 'batik-cendrawasih', 'batik-ceplok', 'batik-ciamis', 'batik-garutan', 'batik-gentongan', 'batik-kawung', 'batik-keraton',
+             'batik-lasem', 'batik-megamendung', 'batik-parang', 'batik-pekalongan', 'batik-priangan', 'batik-sekar', 'batik-sidoluhur', 'batik-sidomukti', 'batik-sogan']
         X = [processed_image]
 
         # getting predictions on val set.
