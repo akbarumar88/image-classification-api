@@ -9,9 +9,6 @@ import keras
 from keras.models import load_model
 # from flask import request
 
-print("TensorFlow version", tf.__version__)
-print("keras version", keras.__version__)
-
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -24,8 +21,12 @@ arr = [
     {'id': 4, 'name': 'Demetrious J.'},
 ]
 
+print("TensorFlow version", tf.__version__)
+print("keras version", keras.__version__)
 # model = load_model('caltech-2.h5')
-model_batik = load_model('mymodel-improved.keras')
+print('**start loading model')
+model_batik = load_model('mymodel-final.h5')
+print('**finish loading model')
 
 
 @app.route('/get/<int:id>', methods=['GET', 'POST', 'PUT'])
@@ -188,8 +189,9 @@ def predictbatik(image):
         print("done preprocessing image!")
         # print(processed_image)
 
-        Z = ['batik-bali', 'batik-betawi', 'batik-celup', 'batik-cendrawasih', 'batik-ceplok', 'batik-ciamis', 'batik-garutan', 'batik-gentongan', 'batik-kawung', 'batik-keraton',
-             'batik-lasem', 'batik-megamendung', 'batik-parang', 'batik-pekalongan', 'batik-priangan', 'batik-sekar', 'batik-sidoluhur', 'batik-sidomukti', 'batik-sogan']
+        Z=['batik-kawung','batik-megamendung','batik-nitik','batik-parang']
+        # Z = ['batik-bali', 'batik-betawi', 'batik-celup', 'batik-cendrawasih', 'batik-ceplok', 'batik-ciamis', 'batik-garutan', 'batik-gentongan', 'batik-kawung', 'batik-keraton',
+        #      'batik-lasem', 'batik-megamendung', 'batik-parang', 'batik-pekalongan', 'batik-priangan', 'batik-sekar', 'batik-sidoluhur', 'batik-sidomukti', 'batik-sogan']
         X = [processed_image]
 
         # getting predictions on val set.
